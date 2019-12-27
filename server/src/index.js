@@ -46,7 +46,10 @@ const resolvers = {
       return link;
     },
     deleteLink: (parent, args) => {
-      // TODO:
+      const indexToDelete = links.findIndex(({ id }) => id === args.id);
+      const deletedLink = links[indexToDelete];
+      links.splice(indexToDelete, 1);
+      return deletedLink;
     }
   }
 };
