@@ -1,15 +1,6 @@
 // import { GraphQLServer } from "graphql-yoga";
 const { GraphQLServer } = require("graphql-yoga");
-
-let links = [
-  {
-    id: "link-0",
-    url: "www.howtographql.com",
-    description: "graphql tutorial"
-  }
-];
-
-let idCount = links.length;
+const { prisma } = require("./generated/prisma-client");
 
 const typeDefs = `
   type Query {
@@ -32,20 +23,23 @@ const typeDefs = `
 const resolvers = {
   Query: {
     info: () => "API for hackernews clone",
-    feed: () => links
+    feed: (root, args, context, info) => context.prisma.links()
   },
 
   Mutation: {
-    post: (parent, args) => {
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
-        url: args.url
-      };
-      links.push(link);
-      return link;
+    post: (root, args, context) => {
+      const {
+        prisma: { createLink }
+      } = context;
+      return createLink({
+        url: args.url,
+        description: args.description
+      });
     },
-    deleteLink: (parent, args) => {
+    deleteLink: (root, args, context) => {
+      const {
+        prisma: { links }
+      } = context;
       const indexToDelete = links.findIndex(({ id }) => id === args.id);
       const deletedLink = links[indexToDelete];
       links.splice(indexToDelete, 1);
@@ -56,7 +50,8 @@ const resolvers = {
 
 const server = new GraphQLServer({
   typeDefs,
-  resolvers
+  resolvers,
+  context: { prisma }
 });
 
 const port = "4000";
