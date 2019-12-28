@@ -12,11 +12,26 @@ const typeDefs = `
     id: ID!
     description: String!
     url: String!
+    postedby: User
+  }
+ 
+  type AuthPayload {
+    token: String
+    user: User
+  }
+
+  type User {
+    id: ID!
+    name: String!
+    email: String!
+    links: [Link!]!
   }
 
   type Mutation {
     post(url: String!, description: String!): Link!
     deleteLink(id: ID!): Link
+    signup(email: String!), password: String!, name: String!): AuthPayload
+    login(email: String, password: String!): AuthPayload
   }
 `;
 
@@ -51,7 +66,7 @@ const resolvers = {
 const server = new GraphQLServer({
   typeDefs,
   resolvers,
-  context: { prisma }
+  context: request => ({ ...request, prisma })
 });
 
 const port = "4000";
