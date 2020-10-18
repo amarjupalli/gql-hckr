@@ -1,0 +1,19 @@
+{
+  "name": "gql-hckr",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/amarjupalli/gql-hckr.git",
+  "author": "amarjupalli <bittuamar@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index"
+  },
+  "dependencies": {
+    "apollo-server": "^2.18.2",
+    "graphql": "^15.3.0",
+    "mongoose": "^5.10.9"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.5"
+  }
+}
