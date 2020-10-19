@@ -2,55 +2,10 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const { UserInputError } = require("apollo-server");
-const User = require("../../models/User");
 
 const { SECRET_KEY } = require("../../config");
-
-const validateRegisterInput = ({
-  username,
-  password,
-  confirmPassword,
-  email,
-}) => {
-  const errors = {};
-
-  if (username.trim() === "") {
-    errors.username = "Username cannot be empty";
-  }
-
-  if (password.trim() === "") {
-    errors.password = "Password cannot be empty";
-  }
-
-  if (confirmPassword.trim() === "") {
-    errors.confirmPassword = "Confirm Password cannot be empty";
-  }
-
-  if (email.trim() === "") {
-    // TODO: validate email with regex
-    errors.email = "Email cannot be empty";
-  }
-
-  const valid = Object.keys(errors).length === 0;
-
-  return { errors, valid };
-};
-
-const validateLoginInput = ({ username, password }) => {
-  const errors = {};
-
-  if (username.trim() === "") {
-    errors.username = "Username cannot be empty";
-  }
-
-  if (password.trim() === "") {
-    errors.password = "Password cannot be empty";
-  }
-
-  const valid = Object.keys(errors).length === 0;
-
-  return { errors, valid };
-};
+const User = require("../../models/User");
+const { validateInput } = require("../../utils/inputValidators");
 
 const generateToken = ({ id, email, username }) => {
   return jwt.sign(
@@ -71,8 +26,7 @@ module.exports = {
         registerInput: { username, password, confirmPassword, email },
       } = args;
 
-      console.log("ob => ", { username, password, confirmPassword, email });
-      const { errors, valid } = validateRegisterInput({
+      const { errors, valid } = validateInput({
         username,
         password,
         confirmPassword,
@@ -113,7 +67,7 @@ module.exports = {
     async login(_, args) {
       const { username, password } = args;
 
-      const { errors, valid } = validateLoginInput({ username, password });
+      const { errors, valid } = validateInput({ username, password });
 
       if (!valid) {
         throw new UserInputError("Invalid stuff", { errors });
