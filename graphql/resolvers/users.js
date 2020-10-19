@@ -36,6 +36,34 @@ const validateRegisterInput = ({
   return { errors, valid };
 };
 
+const validateLoginInput = ({ username, password }) => {
+  const errors = {};
+
+  if (username.trim() === "") {
+    errors.username = "Username cannot be empty";
+  }
+
+  if (password.trim() === "") {
+    errors.password = "Password cannot be empty";
+  }
+
+  const valid = Object.keys(errors).length === 0;
+
+  return { errors, valid };
+};
+
+const generateToken = ({ id, email, username }) => {
+  return jwt.sign(
+    {
+      id,
+      email,
+      username,
+    },
+    SECRET_KEY,
+    { expiresIn: "24h" }
+  );
+};
+
 module.exports = {
   Mutation: {
     async register(_, args) {
@@ -74,19 +102,44 @@ module.exports = {
       });
 
       const savedUser = await user.save();
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.emai,
-          username: user.username,
-        },
-        SECRET_KEY,
-        { expiresIn: "24h" }
-      );
+      const token = generateToken(user);
 
       return {
         ...savedUser._doc,
         id: savedUser._id,
+        token,
+      };
+    },
+    async login(_, args) {
+      const { username, password } = args;
+
+      const { errors, valid } = validateLoginInput({ username, password });
+
+      if (!valid) {
+        throw new UserInputError("Invalid stuff", { errors });
+      }
+
+      const existingUser = await User.findOne({ username });
+      if (!existingUser) {
+        errors.general = `Username ${username} does not exist`;
+        throw new UserInputError(`User not found: ${username}`, { errors });
+      }
+
+      const matches = await bcrypt.compare(password, existingUser.password);
+
+      if (!matches) {
+        errors.general = `Incorrect password for ${username}. Try again.`;
+        throw new UserInputError(
+          `Incorrect password entered by user: ${username}`,
+          { errors }
+        );
+      }
+
+      const token = generateToken(existingUser);
+
+      return {
+        ...existingUser._doc,
+        id: existingUser._id,
         token,
       };
     },
