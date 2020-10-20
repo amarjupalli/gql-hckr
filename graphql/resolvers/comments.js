@@ -1,4 +1,4 @@
-const { UserInputError } = require("apollo-server");
+const { UserInputError, AuthenticationError } = require("apollo-server");
 const Post = require("../../models/Post");
 const { getAuthenticatedUser } = require("../../utils/validateAuth");
 
@@ -8,8 +8,15 @@ module.exports = {
       const user = getAuthenticatedUser(context);
       const { postId, body } = args;
 
+      if (body.trim() === "") {
+        throw new UserInputError("Empty comment", {
+          errors: {
+            body: "Comment cannot be empty",
+          },
+        });
+      }
+
       const post = await Post.findById(postId);
-      console.log("addComment -> post", post);
 
       if (!post) {
         throw new UserInputError("No such post available");
@@ -42,7 +49,7 @@ module.exports = {
         await post.save();
         return post;
       } else {
-        throw new Error("Unauthorized action");
+        throw new AuthenticationError("Unauthorized action");
       }
     },
   },
