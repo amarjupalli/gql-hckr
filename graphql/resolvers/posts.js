@@ -31,6 +31,10 @@ module.exports = {
 
       const { body } = args;
 
+      if (body.trim() === "") {
+        throw new Error("Post cannot be empty!");
+      }
+
       const newPost = new Post({
         body,
         user: user.id,
@@ -39,6 +43,9 @@ module.exports = {
       });
 
       const post = await newPost.save();
+      context.pubsub.publish("NEW_POST", {
+        newPost: post,
+      });
       return post;
     },
     async deletePost(_, args, context) {
@@ -82,6 +89,13 @@ module.exports = {
 
       await post.save();
       return post;
+    },
+  },
+  Subscription: {
+    newPost: {
+      subscribe: (_, __, { pubsub }) => {
+        return pubsub.asyncIterator("NEW_POST");
+      },
     },
   },
 };

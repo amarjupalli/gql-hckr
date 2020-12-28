@@ -3,7 +3,7 @@ const userResolvers = require("./users");
 const commentsResolvers = require("./comments");
 
 module.exports = {
-  // FIXME: better comment - What's this called in gql terminology ? override? post processing?
+  // Field level resolvers
   Post: {
     commentsCount: ({ comments }) => comments.length,
     likesCount: ({ likes }) => likes.length,
@@ -15,5 +15,8 @@ module.exports = {
     ...userResolvers.Mutation,
     ...postResolvers.Mutation,
     ...commentsResolvers.Mutation,
+  },
+  Subscription: {
+    ...postResolvers.Subscription,
   },
 };
