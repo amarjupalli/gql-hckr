@@ -9,7 +9,7 @@
     "start": "nodemon index"
   },
   "dependencies": {
-    "apollo-server": "^2.18.2",
+    "apollo-server": "^2.25.4",
     "bcrypt": "^5.0.0",
     "graphql": "^15.3.0",
     "jsonwebtoken": "^8.5.1",
